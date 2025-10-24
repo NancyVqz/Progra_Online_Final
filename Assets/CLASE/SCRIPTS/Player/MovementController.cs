@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 using Fusion;
 
 [RequireComponent(typeof(Rigidbody), typeof(GroundCheck))]
-public class MovementController : MonoBehaviour
+public class MovementController : NetworkBehaviour
 {
     private InputManager inputManager;
     private Rigidbody rbPlayer;
@@ -14,21 +14,32 @@ public class MovementController : MonoBehaviour
     [SerializeField] private Animator _animator;
    
     
-    private void Start()
+    private void Awake()
     {
-        inputManager = InputManager.Instance;
         rbPlayer = GetComponent<Rigidbody>();
     }
     
-    private void FixedUpdate()
+
+    public override void FixedUpdateNetwork() //Esto se sincroniza con el servidor
     {
-        Movement();
-        _animator.SetBool("IsWalking", inputManager.IsMoveInputPressed());
-        _animator.SetBool("IsRunning", inputManager.WasRunInputPressed());
-        _animator.SetFloat("WalkingZ", inputManager.GetMoveInput().y);
-        _animator.SetFloat("WalkingX", inputManager.GetMoveInput().x);
+        if (Object.HasStateAuthority)
+        {
+            //Aqui debo de cersioarrme de estar recibiendo el input del servidor
+            if (GetInput(out NetworkInputData input)) //este me consigue el input que me manda el sevidor
+            {
+                Movement(input);
+                UpdateAnimator(input);
+            }
+        }
     }
 
+    private void UpdateAnimator(NetworkInputData input)
+    {
+        _animator.SetBool("IsWalking", input.move != Vector2.zero);
+        _animator.SetBool("IsRunning", input.isRunning);
+        _animator.SetFloat("WalkingZ", input.move.y);
+        _animator.SetFloat("WalkingX", input.move.x);
+    }
 
     #region Movimiento
 
@@ -36,17 +47,17 @@ public class MovementController : MonoBehaviour
     [SerializeField] private float runSpeed = 7.7f;
     [SerializeField] private float crouchSpeed = 3.9f;
 
-    private void Movement()
+    private void Movement(NetworkInputData input)
     {
         rbPlayer.linearVelocity = transform.localRotation *
-                            new Vector3(inputManager.GetMoveInput().x, 0, inputManager.GetMoveInput().y) *
-                            (Time.deltaTime * Speed());
+                            new Vector3(input.move.x, 0, input.move.y) *
+                            (Time.deltaTime * Speed(input));
     }
 
-    private float Speed()
+    private float Speed(NetworkInputData input)
     {
-        return inputManager.IsMovingBackwards() || inputManager.IsMovingOnXAxis() ? walkSpeed :
-            inputManager.WasRunInputPressed() ? runSpeed : walkSpeed;
+        return input.move.y < 0 || input.move.x != 0 ? walkSpeed :
+            input.isRunning ? runSpeed : walkSpeed;
     }
 
 

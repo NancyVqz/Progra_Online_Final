@@ -1,10 +1,11 @@
 ﻿using System;
+using Fusion;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 
-public class CameraController : MonoBehaviour
+public class CameraController : NetworkBehaviour
 {
     [Header("Camera Settings")] [SerializeField]
     private Transform player;
@@ -52,24 +53,33 @@ public class CameraController : MonoBehaviour
         }
 
         Cursor.lockState = CursorLockMode.None;
-        //Cursor.visible = false;
-        
-        
-        
+        //Cursor.visible = false;                  
     }
 
-    
-    private void Update()
+    public override void Spawned() //este metodo se manda a llamar despues de hacer spawn
     {
-        RotateCamera();
-        if(!moveHead) return;
-        BlobMove();
-        ResetPosition();
+        if (!HasInputAuthority) //Si no es el jugador al que le di autoridad
+        {
+            GetComponent<Camera>().enabled = false;
+            GetComponent<AudioListener>().enabled = false;
+        }
+    }
+
+
+    public override void FixedUpdateNetwork()
+    {
+        if (HasInputAuthority)
+        {
+            if (GetInput(out NetworkInputData input)) //debo asegurarme de estar recibiendo un input
+            {
+                RotateCamera(input);
+            }
+        }
     }
     
-    private void RotateCamera()
+    private void RotateCamera(NetworkInputData input)
     {
-        Vector2 rawFrameVelocity = Vector2.Scale(inputManager.GetMouseDelta(), Vector2.one * mouseSensitivity);
+        Vector2 rawFrameVelocity = Vector2.Scale(input.look, Vector2.one * mouseSensitivity);
         smoothVelocity = Vector2.Lerp(smoothVelocity, rawFrameVelocity, 1 / smoothnes); // Te mueve desde donde tengas el mouse, a la nueva posicion del mouse
         camVelociy += smoothVelocity;
         camVelociy.y = Mathf.Clamp(camVelociy.y, minAngleY, maxAngleY); // Limita la rotacion de la camara en Y. En base el movimiento del mouse.
