@@ -20,11 +20,9 @@ public class ScoreManager : NetworkBehaviour
 
     [Networked] public int player1 { get; set; }
     [Networked] public int player2 { get; set; }
-
     [Networked] public int player1Victories { get; set; }
     [Networked] public int player2Victories { get; set; }
-
-    private int winningScore;
+    [Networked] private int winningScore { get; set; }
 
     private void Awake()
     {
@@ -58,13 +56,13 @@ public class ScoreManager : NetworkBehaviour
         if (player1 == winningScore)
         {
             player1Victories++;
-            VictoryScreen(1);
+            Rpc_VictoryScreen(1);
         }
 
         if (player2 == winningScore)
         {
             player2Victories++;
-            VictoryScreen(2);
+            Rpc_VictoryScreen(2);
         }
     }
 
@@ -72,16 +70,17 @@ public class ScoreManager : NetworkBehaviour
     {
         player1Score.text = "Player 1: " + player1;
         player2Score.text = "Player 2: " + player2;
+        scoreToWin.text = "Points to win:" + winningScore;
         victoriesText.text = $"Player 1 Wins: {player1Victories} \nPlayer 2 Wins: {player2Victories}";
     }
 
     private void ScoreToWin()
     {
         winningScore = Random.Range(10, 25);
-        scoreToWin.text = "Points to win:" + winningScore;
     }
 
-    private void VictoryScreen(int winner)
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void Rpc_VictoryScreen(int winner)
     {
         winnerText.text = "Victory to: Player " + winner;
         StartCoroutine(ShowVictory());
