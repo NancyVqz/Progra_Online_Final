@@ -151,6 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cb9ab3e3c648b0429b68a5180e4fdd3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _camY: 0
   player: {fileID: 7757777669868418755}
   mouseSensitivity: 1
   smoothnes: 0
@@ -162,7 +163,6 @@ MonoBehaviour:
   walkingFrequency: 10
   runningFrequency: 18
   resetPosSpeed: 3
-  toggleSpeed: 3
   moveHead: 0
 --- !u!1 &5769638104061799461
 GameObject:
@@ -194,6 +194,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7757777669868418755}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6760439117771760581
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6096904931117104338}
+  m_Layer: 0
+  m_Name: Firepoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6096904931117104338
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6760439117771760581}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
+  m_LocalPosition: {x: 1.2165537, y: 0.21643478, z: 0}
+  m_LocalScale: {x: 1.1892017, y: 1.1892018, z: 1.1892017}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 178770067982214758}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &428307128888852877
 PrefabInstance:
@@ -269,14 +300,53 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 342909311b4900c42a2f950a16e59380, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 67d35ad5bed9e3b479819e0f14443093, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6096904931117104338}
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 67d35ad5bed9e3b479819e0f14443093, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3171069972507886296}
   m_SourcePrefab: {fileID: 100100000, guid: 67d35ad5bed9e3b479819e0f14443093, type: 3}
 --- !u!4 &178770067982214758 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 67d35ad5bed9e3b479819e0f14443093, type: 3}
   m_PrefabInstance: {fileID: 428307128888852877}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &662256475229207772 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 67d35ad5bed9e3b479819e0f14443093, type: 3}
+  m_PrefabInstance: {fileID: 428307128888852877}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3171069972507886296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 662256475229207772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c25c52366ad30340b971a08ffde5c16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shootMode: 0
+  bulletPrefab:
+    RawGuidValue: 616f47ca84d562140a06a798713aaaa5
+  runner: {fileID: 0}
+  firePoint: {fileID: 6096904931117104338}
+  playerCam: {fileID: 2004241258586173959}
+  hitLayers:
+    serializedVersion: 2
+    m_Bits: 65
+  damage: 100
+  range: 10
+  currentAmmo: 30
+  maxAmmo: 30
+  fireRate: 0
+  reloadTime: 2
+  isReloaded: 0
 --- !u!1001 &7792230991703806248
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1030,7 +1100,13 @@ PrefabInstance:
       addedObject: {fileID: 1262374424648534852}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 55490c0cec081d54ead6cc6d7cbaecc4, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 5596952100739389460}
+      addedObject: {fileID: 2075147071959874048}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 55490c0cec081d54ead6cc6d7cbaecc4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 635649885341044375}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 55490c0cec081d54ead6cc6d7cbaecc4, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6596451160728791597}
   m_SourcePrefab: {fileID: 100100000, guid: 55490c0cec081d54ead6cc6d7cbaecc4, type: 3}
 --- !u!1 &6981416273855294585 stripped
 GameObject:
@@ -1105,7 +1181,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 1
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
@@ -1142,7 +1218,6 @@ MonoBehaviour:
   _animator: {fileID: 5331981169249636778}
   walkSpeed: 400
   runSpeed: 600
-  crouchSpeed: 4
 --- !u!114 &3146972526466327272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1175,10 +1250,13 @@ MonoBehaviour:
   NestedObjects: []
   NetworkedBehaviours:
   - {fileID: 6874037483875834447}
-  - {fileID: 5596952100739389460}
+  - {fileID: 2075147071959874048}
+  - {fileID: 635649885341044375}
+  - {fileID: 6596451160728791597}
   - {fileID: 1059043645385177550}
+  - {fileID: 3171069972507886296}
   ForceRemoteRenderTimeframe: 0
---- !u!114 &5596952100739389460
+--- !u!114 &2075147071959874048
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1187,14 +1265,62 @@ MonoBehaviour:
   m_GameObject: {fileID: 6981416273855294585}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 158639473, guid: e725a070cec140c4caffb81624c8c787, type: 3}
+  m_Script: {fileID: 11500000, guid: cd85c9995c7d4d54e8eec3bb3219ece0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentWeapon: {fileID: 3171069972507886296}
+--- !u!114 &635649885341044375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6981416273855294585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5299e4650452b14478935a8749a98c21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 100
+  __health: 0
+--- !u!114 &6596451160728791597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6981416273855294585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f7684f04e649e84fb2ee1bc9fbee42d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _stateAuthorityChangeErrorCorrectionDelta: 0
-  SyncScale: 0
-  SyncParent: 0
-  _autoAOIOverride: 1
-  DisableSharedModeInterpolation: 0
+  _settings:
+    Shape: 1
+    IsTrigger: 0
+    Radius: 0.5
+    Height: 2.3
+    Extent: 0.035
+    ColliderLayer: 0
+    CollisionLayerMask:
+      serializedVersion: 2
+      m_Bits: 1
+    Features: -1
+    InputAuthorityBehavior: 0
+    StateAuthorityBehavior: 0
+    ProxyInterpolationMode: 0
+    ForcePredictedLookRotation: 0
+    AllowClientTeleports: 0
+    Processors: []
+    MaxPenetrationSteps: 8
+    CCDRadiusMultiplier: 0.75
+    AntiJitterDistance: {x: 0.025, y: 0.01}
+    PredictionCorrectionSpeed: 30
+    NetworkedInteractions: 8
+    CompressNetworkPosition: 0
+    ForceSingleOverlapQuery: 0
+    SuppressConvexMeshColliders: 0
 --- !u!4 &7757777669868418755 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 55490c0cec081d54ead6cc6d7cbaecc4, type: 3}

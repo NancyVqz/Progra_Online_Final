@@ -68,6 +68,14 @@ public class InputManager : MonoBehaviour
         return playerControls.Player.Look.ReadValue<Vector2>();
     }
  
+    public bool ShootInputPressed()
+    {
+        return playerControls.Player.Fire.WasPressedThisFrame();
+    }
 
-    
+    //public bool ReloadInputPressed()
+    //{
+    //    return playerControls.Player.Reload.WasPressedThisFrame();
+    //}
+
 }

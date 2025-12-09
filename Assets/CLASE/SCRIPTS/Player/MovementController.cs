@@ -1,24 +1,26 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.InputSystem;
 using Fusion;
+using Fusion.Addons.KCC;
+using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody), typeof(GroundCheck))]
+/// <summary>
+/// RequireComponent agrega al objeto que tiene este script, los componentes que escribes dentro
+/// </summary>
+[RequireComponent(typeof(Rigidbody), typeof(GroundCheck), typeof(KCC))]
 public class MovementController : NetworkBehaviour
 {
-    private InputManager inputManager;
     private Rigidbody rbPlayer;
 
     [SerializeField] private Animator _animator;
-   
-    
+
+    private KCC kcc;
+
+
     private void Awake()
     {
         rbPlayer = GetComponent<Rigidbody>();
+        kcc = GetComponent<KCC>();
     }
-    
+
 
     public override void FixedUpdateNetwork() //Esto se sincroniza con el servidor
     {
@@ -45,13 +47,17 @@ public class MovementController : NetworkBehaviour
 
     [SerializeField] private float walkSpeed = 5.5f;
     [SerializeField] private float runSpeed = 7.7f;
-    [SerializeField] private float crouchSpeed = 3.9f;
+    //[SerializeField] private float crouchSpeed = 3.9f;
 
     private void Movement(NetworkInputData input)
     {
-        rbPlayer.linearVelocity = transform.localRotation *
-                            new Vector3(input.move.x, 0, input.move.y) *
-                            (Time.deltaTime * Speed(input));
+        Quaternion realRotation = Quaternion.Euler(0, input.yRotation, 0); //creamos angulos colo definiendo Y que es el que nos interesa
+        Vector3 worldDirection = realRotation * (new Vector3(input.move.x, 0, input.move.y));
+
+        //rbPlayer.linearVelocity = worldDirection.normalized * (Runner.DeltaTime * Speed(input));
+
+        kcc.SetKinematicVelocity(worldDirection.normalized * (Runner.DeltaTime * Speed(input)));
+
     }
 
     private float Speed(NetworkInputData input)
@@ -63,5 +69,5 @@ public class MovementController : NetworkBehaviour
 
     #endregion
 
-  
+
 }

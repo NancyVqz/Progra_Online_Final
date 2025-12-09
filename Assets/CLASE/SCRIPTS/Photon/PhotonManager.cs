@@ -34,7 +34,9 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
             NetworkObject networkPlayer = runner.Spawn(prefab, spawnPoint[randomSpawn].position, spawnPoint[randomSpawn].rotation, player);
             players.Add(player, networkPlayer); //Agregamos el diccionario el id del jugador y lo vinculamos con su prefab que acaba de instancearse
         }
-        onPlayerJoined.Invoke(); //esto invoca el evento //Esta afuera para que todo jugador que entre se le apague el cambas 
+        onPlayerJoined.Invoke(); //esto invoca el evento //Esta afuera para que todo jugador que entre se le apague el canvas
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;  
     }
     public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
     {
@@ -80,9 +82,11 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
         //creo un objeto de tipo NetworkInputData
         NetworkInputData data = new NetworkInputData()
         {
-            move = InputManager.Instance.GetMoveInput(),
+            move = InputManager.Instance.GetMoveInput() == null ? new Vector2(0,0) : InputManager.Instance.GetMoveInput(),
             look = InputManager.Instance.GetMouseDelta(),
-            isRunning = InputManager.Instance.WasRunInputPressed()
+            isRunning = InputManager.Instance.WasRunInputPressed(),
+            yRotation = Camera.main.transform.eulerAngles.y,
+            shoot = InputManager.Instance.ShootInputPressed(),
         };
 
         input.Set(data);

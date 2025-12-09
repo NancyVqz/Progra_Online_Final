@@ -1,18 +1,22 @@
 ﻿using System;
 using Fusion;
+using Fusion.Addons.KCC;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 
 public class CameraController : NetworkBehaviour
 {
-    [Header("Camera Settings")] [SerializeField]
+    [Networked] public float camY { get; set; }
+
+    [Header("Camera Settings")]
+    [SerializeField]
     private Transform player;
 
     [SerializeField] private float mouseSensitivity = 1;
 
-    [FormerlySerializedAs("smooth")] [SerializeField]
+    [FormerlySerializedAs("smooth")]
+    [SerializeField]
     private float smoothnes;
 
     [SerializeField] private float maxAngleY = 80;
@@ -20,36 +24,38 @@ public class CameraController : NetworkBehaviour
 
     private Vector2 camVelociy;
     private Vector2 smoothVelocity;
+    private KCC kcc;
 
-    [Header("Blob Movement")] 
+    [Header("Blob Movement")]
     [SerializeField] private float walkingSpeed = 1f;
-    
-    [SerializeField, Range(0,0.1f)] private float walkingAmplitude = 0.015f; // Que tanto se mueve hacia los lados al caminar
-    [SerializeField, Range(0,0.1f)] private float runningAmplitude = 0.015f; // Que tanto se mueve hacia los lados al correr
-    [SerializeField, Range(0,15)] private float walkingFrequency = 10.0f; // La frecuencia con la que se mueve al caminar
-    [SerializeField, Range(10,20)] private float runningFrequency = 18f; // La frecuencia con la que se mueve al correr
+
+    [SerializeField, Range(0, 0.1f)] private float walkingAmplitude = 0.015f; // Que tanto se mueve hacia los lados al caminar
+    [SerializeField, Range(0, 0.1f)] private float runningAmplitude = 0.015f; // Que tanto se mueve hacia los lados al correr
+    [SerializeField, Range(0, 15)] private float walkingFrequency = 10.0f; // La frecuencia con la que se mueve al caminar
+    [SerializeField, Range(10, 20)] private float runningFrequency = 18f; // La frecuencia con la que se mueve al correr
     [SerializeField] private float resetPosSpeed = 3.0f; // Cuando dejas de moverte que regrese al centro
-    [SerializeField] private float toggleSpeed = 3.0f; // 
-    
+                                                         //[SerializeField] private float toggleSpeed = 3.0f; 
+
     private Vector3 startPos; // Posicion inicial de la cabeza , el centro
 
     [SerializeField] private bool moveHead;
-    
-    private Vector2 head;
-    
+
+    //private Vector2 head;
+
     private InputManager inputManager;
-    
+
     private void Awake()
     {
         startPos = transform.localPosition;
+        kcc = GetComponentInParent<KCC>();
     }
-    
+
     private void Start()
     {
         inputManager = InputManager.Instance;
         if (player == null)
         {
-            player = FindObjectOfType<MovementController>().transform;
+            player = FindAnyObjectByType<MovementController>().transform;
         }
 
         Cursor.lockState = CursorLockMode.None;
@@ -65,18 +71,28 @@ public class CameraController : NetworkBehaviour
         }
     }
 
-
-    public override void FixedUpdateNetwork()
+    /// <summary>
+    /// El Render() manda a photon lo que esta adentro x veces por segundo segun tu framerate
+    /// 
+    /// Lo usamos para cambios meramente visuales 
+    /// </summary>
+    /// 
+    public override void Render()
     {
-        if (HasInputAuthority)
+        if(!HasInputAuthority && !HasStateAuthority)
         {
-            if (GetInput(out NetworkInputData input)) //debo asegurarme de estar recibiendo un input
-            {
-                RotateCamera(input);
-            }
+            transform.localRotation = Quaternion.AngleAxis(-camY, Vector3.right);
         }
     }
-    
+    public override void FixedUpdateNetwork()
+    {
+        //if (HasInputAuthority) lo quitamos para que todos puedan ver nuestra rotacion 
+        if (GetInput(out NetworkInputData input)) //debo asegurarme de estar recibiendo un input
+        {
+            RotateCamera(input);
+        }
+    }
+
     private void RotateCamera(NetworkInputData input)
     {
         Vector2 rawFrameVelocity = Vector2.Scale(input.look, Vector2.one * mouseSensitivity);
@@ -84,26 +100,33 @@ public class CameraController : NetworkBehaviour
         camVelociy += smoothVelocity;
         camVelociy.y = Mathf.Clamp(camVelociy.y, minAngleY, maxAngleY); // Limita la rotacion de la camara en Y. En base el movimiento del mouse.
 
+        //Mi calculo de rotacion se hace local, pero mi rotacion va a ser por Networking
+        camY = camVelociy.y;
+
         transform.localRotation = Quaternion.AngleAxis(-camVelociy.y, Vector3.right); // Rota la camara hacia arriba y abajo. La rotacion esta en X. 
-        player.localRotation = Quaternion.AngleAxis(camVelociy.x, Vector3.up);
+
+        //player.localRotation = Quaternion.AngleAxis(camVelociy.x, Vector3.up);
+
+        kcc.SetLookRotation(Quaternion.AngleAxis(camVelociy.x, Vector3.up));
+
     }
-    
-   private void BlobMove()
+
+    private void BlobMove()
     {
         if (!inputManager.IsMoveInputPressed()) // Si no presiono ningun input
         {
             return; // termina el metodo
         }
-        
-        if(inputManager.IsMoveInputPressed()) // Pregunto si me estoy moviendo
+
+        if (inputManager.IsMoveInputPressed()) // Pregunto si me estoy moviendo
         {
-            if(inputManager.IsMovingBackwards() || inputManager.IsMovingOnXAxis()) // Me estoy moviendo hacia atras o hacia los lados?
+            if (inputManager.IsMovingBackwards() || inputManager.IsMovingOnXAxis()) // Me estoy moviendo hacia atras o hacia los lados?
             {
                 transform.localPosition += FootStepMotion();
             }
             else //  Entonces me muevo hacia adelante
             {
-                if(inputManager.WasRunInputPressed()) // Estoy corriendo?
+                if (inputManager.WasRunInputPressed()) // Estoy corriendo?
                 {
                     transform.localPosition += RunningFootStepMotion();
                 }
@@ -114,20 +137,20 @@ public class CameraController : NetworkBehaviour
             }
         }
 
-        if(inputManager.IsMoveInputPressed())
+        if (inputManager.IsMoveInputPressed())
         {
             transform.localPosition += inputManager.IsMovingBackwards() || inputManager.IsMovingOnXAxis() ? FootStepMotion() : inputManager.WasRunInputPressed() ? RunningFootStepMotion() : FootStepMotion();
         }
-        
-        
-        
-    } 
+
+
+
+    }
 
     private void ResetPosition()
     {
-        if(transform.localPosition == startPos) return; // Si la camara ya esta en la pos inicial, no hace nada
+        if (transform.localPosition == startPos) return; // Si la camara ya esta en la pos inicial, no hace nada
         transform.localPosition = Vector3.Lerp(transform.localPosition, startPos, resetPosSpeed * Time.deltaTime);
-}
+    }
 
     private Vector3 FootStepMotion()
     {
@@ -136,8 +159,8 @@ public class CameraController : NetworkBehaviour
         pos.x = Mathf.Cos(Time.time * walkingFrequency / 2) * walkingAmplitude * 2 * walkingSpeed;
         return pos;
     }
-    
-    
+
+
     private Vector3 RunningFootStepMotion()
     {
         Vector3 pos = Vector3.zero;
@@ -145,5 +168,5 @@ public class CameraController : NetworkBehaviour
         pos.x = Mathf.Cos(Time.time * runningFrequency / 2) * runningAmplitude * 2 * walkingSpeed;
         return pos;
     }
-    
+
 }
