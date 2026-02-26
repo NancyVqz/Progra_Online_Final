@@ -1,4 +1,5 @@
 using Fusion;
+using TMPro;
 using UnityEngine;
 
 
@@ -7,10 +8,17 @@ public class LobbyManager : MonoBehaviour
 {
     [SerializeField] private Transform viewportContent;
     [SerializeField] private GameObject lobbyPrefab;
+    [SerializeField] private GameObject warningMessage;
 
-    private void Start()
+    [SerializeField] private TMP_Text maxPlayerCountText;
+    private int maxPlayerCount = 1;
+
+    public TMP_Text sessionNameCustom;
+    public TMP_Text maxPlayersCustom;
+
+    private void OnEnable()
     {
-        if (PhotonManager._PhotonManager != null) 
+        if (PhotonManager._PhotonManager != null)
         {
             PhotonManager._PhotonManager.onSessionListUpdated += DestroyCanvasContent;
             PhotonManager._PhotonManager.onSessionListUpdated += UpdateSessionCanvas;
@@ -21,33 +29,34 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
-    //private void OnDestroy() 
-    //{
-    //    if (PhotonManager._PhotonManager != null)
-    //    {
-    //        PhotonManager._PhotonManager.onSessionListUpdated -= DestroyCanvasContent;
-    //        PhotonManager._PhotonManager.onSessionListUpdated -= UpdateSessionCanvas;
-    //    }
-    //}
-
     public void UpdateSessionCanvas()
     {
-        DestroyCanvasContent();
-
         Debug.Log("Creando sesiones: " + PhotonManager._PhotonManager.availableSessions.Count);
-        foreach(SessionInfo session in PhotonManager._PhotonManager.availableSessions)
+        foreach (SessionInfo session in PhotonManager._PhotonManager.availableSessions)
         {
             GameObject sessionIntance = Instantiate(lobbyPrefab, viewportContent);
             sessionIntance.GetComponent<SessionEntry>().SetInfo(session);
         }
-
     }
-    private void DestroyCanvasContent()
+
+    public void DestroyCanvasContent()
     {
         Debug.Log("Destroy Canvas");
+
+        warningMessage.SetActive(PhotonManager._PhotonManager.availableSessions.Count <= 0);
+
         for (int i = 0; i < viewportContent.childCount; i++)
         {
             Destroy(viewportContent.GetChild(i).gameObject);
         }
+    }
+
+    public void UpdatePlayerCount(int number)
+    {
+        maxPlayerCount += number;
+
+        maxPlayerCount = maxPlayerCount > 10? 1 : maxPlayerCount <= 0? 10 : maxPlayerCount; 
+
+        maxPlayerCountText.text = maxPlayerCount.ToString();
     }
 }

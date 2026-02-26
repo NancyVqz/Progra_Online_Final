@@ -361,7 +361,6 @@ GameObject:
   - component: {fileID: 4966848397488764315}
   - component: {fileID: 6958532319023897407}
   - component: {fileID: 1399372633821567972}
-  - component: {fileID: 4723640626872860334}
   m_Layer: 5
   m_Name: Session
   m_TagString: Untagged
@@ -428,21 +427,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &4723640626872860334
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5620363514139454966}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35ed30d09640f7a4da0695dbcee2cf67, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sessionName: {fileID: 7567054732673583809}
-  playerCount: {fileID: 3408243624053087799}
-  joinButton: {fileID: 6711116299867585151}
 --- !u!1 &7002512734877921407
 GameObject:
   m_ObjectHideFlags: 0

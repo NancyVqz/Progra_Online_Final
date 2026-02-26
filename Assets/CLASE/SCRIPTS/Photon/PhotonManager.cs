@@ -4,7 +4,6 @@ using Fusion;
 using Fusion.Sockets;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using Random = UnityEngine.Random;
 
@@ -17,7 +16,8 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [SerializeField] Dictionary<PlayerRef, NetworkObject> players = new Dictionary<PlayerRef, NetworkObject>(); // PlayerRef es el ID de nuestro jugador en la red, NetwokrObject es el prefab/objeto de nuestro jugador
     [SerializeField] UnityEvent onPlayerJoinedToGame; // Los UnityEvents son llamadas que se hacen al invocar un evento
-
+    [SerializeField] LobbyManager lobby;
+    
     public List<SessionInfo> availableSessions = new List<SessionInfo>();
 
     public event Action onSessionListUpdated;
@@ -41,20 +41,14 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
         runner.AddCallbacks(this);
     }
 
+    //[SerializeField] private GameObject loadingScreen;
     public async void JoinLobby()
     {
+        //loadingScreen.SetActive(true);
         await runner.JoinSessionLobby(SessionLobby.ClientServer);
+        //loadingScreen.SetActive(false);
     }
 
-    //private void Update()
-    //{
-    //    if (Keyboard.current.mKey.wasPressedThisFrame)
-    //    {
-    //        JoinLobby();
-    //    }
-    //}
-
-    #region Metodos de Photon
     /// <summary>
     /// 
     /// Callback es algo que se manda a llamar automaticamente cuando otro proceso termina
@@ -116,6 +110,7 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
         onSessionListUpdated?.Invoke();
     }
 
+    #region Metodos de Photon
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)
     {
     }
@@ -207,6 +202,48 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
             SessionName = RandomSessionName(6), // Este nombre es el interno que yo como desarrollador necesito entender
             Scene = scene,
             SceneManager = sceneManager,
+            IsVisible = true,
+            PlayerCount = 4   // Numero de jugadores que permite la sesion, 4
+        });
+    }
+
+    private async void StartGameCustom(GameMode mode)
+    {
+        runner.ProvideInput = true; // Esto nos dice que el runner recibira y mandara inputs
+        var scene = SceneRef.FromIndex(0); // Guardame una referencia a la escena 0.
+        var sceneInfo = new NetworkSceneInfo(); // Creo una variable que me va a guardar las escenas que voy a usar, 
+        if (scene.IsValid)
+        {
+            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
+        }
+
+        await runner.StartGame(new StartGameArgs()
+        {
+            GameMode = mode,
+            SessionName = CustomSessionName(), // Nombre custom
+            Scene = scene,
+            SceneManager = sceneManager,
+            IsVisible = true,
+            PlayerCount = CustomMaxPlayers()  // Max players custom
+        });
+    }
+
+    public async void JoinSession(string sessionName)
+    {
+        runner.ProvideInput = true; // Esto nos dice que el runner recibira y mandara inputs
+        var scene = SceneRef.FromIndex(0); // Guardame una referencia a la escena 0.
+        var sceneInfo = new NetworkSceneInfo(); // Creo una variable que me va a guardar las escenas que voy a usar, 
+        if (scene.IsValid)
+        {
+            sceneInfo.AddSceneRef(scene, LoadSceneMode.Additive);
+        }
+
+        await runner.StartGame(new StartGameArgs()
+        {
+            GameMode = GameMode.Client,
+            SessionName = sessionName, // Este nombre es el interno que yo como desarrollador necesito entender
+            Scene = scene,
+            SceneManager = sceneManager,
             IsVisible = true
         });
     }
@@ -214,6 +251,11 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
     public void StartGameAsHost()
     {
         StartGame(GameMode.Host);
+    }
+
+    public void StartGameAsHostInCustom()
+    {
+        StartGameCustom(GameMode.Host);
     }
 
     public void StartGameAsClient()
@@ -226,14 +268,23 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
         string caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         string sessionName = "";
 
-        for(int i = 0; i < sessionNameLength; i++)
+        for (int i = 0; i < sessionNameLength; i++)
         {
-            char randomChar = caracteres[Random.Range(0,caracteres.Length)];
+            char randomChar = caracteres[Random.Range(0, caracteres.Length)];
             sessionName += randomChar; // "" + a = "a" // "a" = "a" + "k" = "ak"
         }
 
         return sessionName;
     }
 
- 
+    private string CustomSessionName()
+    {
+        return lobby.sessionNameCustom.text.ToString();
+    }
+
+    private int CustomMaxPlayers()
+    {
+        return int.Parse(lobby.maxPlayersCustom.text);
+    }
+
 }
