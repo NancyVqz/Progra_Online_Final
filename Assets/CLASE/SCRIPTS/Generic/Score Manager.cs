@@ -15,6 +15,7 @@ public class ScoreManager : NetworkBehaviour
     [SerializeField] TextMeshProUGUI winnerText;
 
     [SerializeField] TextMeshProUGUI victoriesText;
+    [SerializeField] TextMeshProUGUI lossesText;
 
     public bool canShoot { get; private set; }
 
@@ -22,7 +23,15 @@ public class ScoreManager : NetworkBehaviour
     [Networked] public int player2 { get; set; }
     [Networked] public int player1Victories { get; set; }
     [Networked] public int player2Victories { get; set; }
+    [Networked] public int player1Losses { get; set; }
+    [Networked] public int player2Losses { get; set; }
     [Networked] private int winningScore { get; set; }
+    [Networked] public string player1Username { get; set; }
+    [Networked] public string player2Username { get; set; }
+
+    [Networked] public bool barriers { get; set; }
+    [SerializeField] public GameObject barrier;
+    [SerializeField] public GameObject waitingForPlayersCanvas;
 
     private void Awake()
     {
@@ -33,11 +42,15 @@ public class ScoreManager : NetworkBehaviour
     {
         ScoreToWin();
         canShoot = true;
+        barriers = true;
     }
 
     public override void Render()
     {
         UpdateUI();
+
+        barrier.SetActive(barriers);
+        waitingForPlayersCanvas.SetActive(barriers);
     }
 
     [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
@@ -51,27 +64,31 @@ public class ScoreManager : NetworkBehaviour
         {
             player2++;
         }
-        Debug.Log($"Score P1: {player1} / P2: {player2}");
+        Debug.Log($"Score {player1Username} : {player1} / {player2Username} : {player2}");
 
         if (player1 == winningScore)
         {
             player1Victories++;
-            Rpc_VictoryScreen(1);
+            player2Losses++;
+            Rpc_VictoryScreen(player1Username);
         }
 
         if (player2 == winningScore)
         {
             player2Victories++;
-            Rpc_VictoryScreen(2);
+            player1Losses++;
+            Rpc_VictoryScreen(player2Username);
         }
     }
 
     private void UpdateUI()
     {
-        player1Score.text = "Player 1: " + player1;
-        player2Score.text = "Player 2: " + player2;
+        player1Score.text = player1Username + " : " + player1;
+        player2Score.text = player2Username + " : " + player2;
+
         scoreToWin.text = "Points to win:" + winningScore;
-        victoriesText.text = $"Player 1 Wins: {player1Victories} \nPlayer 2 Wins: {player2Victories}";
+        victoriesText.text = $"{player1Username} Wins: {player1Victories} \n{player2Username} Wins: {player2Victories}";
+        lossesText.text = $"{player1Username} Losses: {player1Losses} \n{player2Username} Losses: {player2Losses}";
     }
 
     private void ScoreToWin()
@@ -80,9 +97,33 @@ public class ScoreManager : NetworkBehaviour
     }
 
     [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
-    private void Rpc_VictoryScreen(int winner)
+    private void Rpc_VictoryScreen(string winner)
     {
-        winnerText.text = "Victory to: Player " + winner;
+        winnerText.text = "Victory to: " + winner;
+
+        PlayerData playerData = FindFirstObjectByType<PlayerData>();
+        int myVictories;
+        int myLosses;
+
+        if (Runner.LocalPlayer.PlayerId == 1)
+        {
+            myVictories = player1Victories;
+            myLosses = player1Losses;
+        }
+        else
+        {
+            myVictories = player2Victories;
+            myLosses = player2Losses;
+        }
+
+        if (winner == PlayFabManager._PlayfabManager.username)
+        {
+            playerData.UpdateClassData("Wins", myVictories.ToString());
+        }
+        else
+        {
+            playerData.UpdateClassData("Losses", myLosses.ToString());
+        }
         StartCoroutine(ShowVictory());
     }
 
@@ -98,5 +139,12 @@ public class ScoreManager : NetworkBehaviour
         player2 = 0;
         ScoreToWin();
         canShoot = true;
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    public void Rpc_CanPlay()
+    {
+        barrier.SetActive(false);
+        waitingForPlayersCanvas.SetActive(false);
     }
 }

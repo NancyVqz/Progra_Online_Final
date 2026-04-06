@@ -67,7 +67,13 @@ public class PhotonManager : MonoBehaviour, INetworkRunnerCallbacks
             NetworkObject networkPlayer = runner.Spawn(prefab, spawnPoint[randomSpawn].position, spawnPoint[randomSpawn].rotation, player);
             players.Add(player, networkPlayer); // Agregamos al diccionario el id de el jugador y lo vinculamos con su prefab que acaba de instanciarse
         }
-        onPlayerJoinedToGame.Invoke(); // Invoca mi evento // Esto se pone afuera de el if para que a todo jugador que entre se le apague el canvas
+
+        if (players.Count > 1)
+        {
+            ScoreManager.instance.barriers = false;
+        }
+
+        onPlayerJoinedToGame.Invoke(); // Invoca mi evento. Esto se pone afuera de el if para que a todo jugador que entre se le apague el canvas
 
     }
 
