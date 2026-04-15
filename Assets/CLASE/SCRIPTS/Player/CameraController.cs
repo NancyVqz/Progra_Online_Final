@@ -62,12 +62,19 @@ public class CameraController : NetworkBehaviour
         //Cursor.visible = false;                  
     }
 
+    public SkinnedMeshRenderer[] playerSkin;
+
     public override void Spawned() //este metodo se manda a llamar despues de hacer spawn
     {
         if (!HasInputAuthority) //Si no es el jugador al que le di autoridad
         {
             GetComponent<Camera>().enabled = false;
             GetComponent<AudioListener>().enabled = false;
+
+            for (int i= 0; i < playerSkin.Length; i++)
+            {
+                playerSkin[i].enabled = true;
+            }
         }
     }
 

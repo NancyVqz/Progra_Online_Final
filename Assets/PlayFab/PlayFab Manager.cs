@@ -44,6 +44,7 @@ public class PlayFabManager : MonoBehaviour
         try
         {
             var resut = await RegisterPlayfabAccount();
+            username = register_UsernameInputField.text;
             Debug.Log("Usuario Registrado");
             OnLogSuccess.Invoke();
         }

@@ -40,6 +40,9 @@ public class ScoreManager : NetworkBehaviour
 
     public override void Spawned()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         ScoreToWin();
         canShoot = true;
         barriers = true;
